@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Results
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="container p-5 my-5 border">
+        <div class="row">
+            <div class="col">
+                <div class="container d-flex justify-content-center">
+                    <p class="h4">
+                        Prediction Result and Interpretaion <br>
+                        Patient age: {{patient_info[0]}}, gender: {{"Male" if patient_info[1] == 0 else "Female" if
+                        patient_info[1] == 1 else patient_info[1]}} <br>
+                        Prediction: {{diag}} <br>
+                        Duration: {{duration}} s<br>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <img src="{{url_for('static', filename='best_model_0.png')}}" class="img-fluid" height="1200" width="900" />
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}
+About
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="container p-5 my-5 border">
+        <div class="row">
+            <h3>What is Interpretable AI?</h3>
+            <div class="col">
+                Interpretable AI refers to the ability of an artificial intelligence system to provide
+                easy-to-understand
+                explanations of the prediction outcomes for humans. In medicine, interpretable AI is important because
+                it can help improve the accuracy and reliability of medical diagnoses, treatment recommendations, and
+                patient outcomes. Interpretable AI can provide doctors and other healthcare professionals with insights
+                into how the AI system arrived at a particular diagnosis or treatment recommendation. This can help
+                doctors make more informed decisions, verify the accuracy of the AI's output, and identify potential
+                errors or biases in the AI system. Additionally, interpretable AI can provide patients with a better
+                understanding of their medical conditions and treatment options, which can improve patient engagement
+                and satisfaction.
+
+                To build our application we have developed a black box convolutional neural network model. However,
+                using a gradient class activation map (GradCAM) [1], we are able to explain the most important parts or
+                features of the given data.
+            </div>
+        </div>
+        <div class="row">
+            <h3>How to Use?</h3>
+            <div class="col">
+                The primary concern of our application is to classify electrocardiogram (ECG) signals whether they
+                belong to a healthy person or to a patient with myocardial infarction (MI). Additionally, this
+                application is able to explain why the given signals indicate a healthy person or MI patient using
+                GradCAM. <br>
+                Step-by-step usage: <br>
+                <ol>
+                    <li>Upload your ECG report in PDF format: An ECG report consists of 5 pages that contain 12-lead
+                        ECG signals. Each page contains the same signals but with different durations. Our model works
+                        on
+                        signals with a 10-second duration (pages: 3,4). Moreover, each page may contain relevant
+                        information about the patient such as age and gender. If such information is present in the
+                        report,
+                        our model also uses them.</li>
+                    <li>Obtain the result: The result contains the classification results and interpretations of the
+                        signals. Interpretations is a color map of the signals where hot colors (red) indicate the most
+                        important segments and cold colors (blue) indicate the non-discriminative segments.</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <h3>What Happens to My Data?</h3>
+            <div class="col">
+                All extracted data and ECG reports are being deleted permanently after the results generated.
+            </div>
+        </div>
+        <div class="row">
+            <h3>References</h3>
+            <div class="col">
+                [1] Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D., & Batra, D. (2017). Grad-cam:
+                Visual explanations from deep networks via gradient-based localization. In Proceedings of the IEEE
+                international conference on computer vision (pp. 618-626).
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

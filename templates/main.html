@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Upload ECG Report
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="main">
+        <div class="row mt-5 mb-5 ">
+            <div class="col-md-4 offset-md-4">
+                <br> <br> <br>
+                {% if error %}
+                <h3>{{error}} </h3>
+                {% endif %} <br><br>
+                <h1>Interpretable Deep Learning for Myocardial Infarction Detection</h1>
+                <!-- <h5>Please Upload 12-Lead ECG Report PDF</h5> -->
+                <div class="col" id="upload" style="visibility: visible;">
+                    <form action="{{url_for('results')}}" method="post" enctype="multipart/form-data">
+                        {{fileUploader.hidden_tag()}}
+                        <p>Please upload a 12-Lead ECG Report PDF</p>
+                        {% from "_formhelper.html" import render_field %}
+                        {{ fileUploader.csrf_token }}
+                        <!-- sample image can be placed here -->
+                        <label for="File">File</label>
+                        {{ render_field(fileUploader.file, class="form-control", id="file") }}
+                        <h2 style="color:red; margin-bottom: 10px;">{{ fileError }}</h2>
+                        <button type="submit" class="btn btn-primary">
+                            Submit
+                        </button>
+                        <h2 style="color:blue; margin-bottom: 10px;">{{ msg }}</h2>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
