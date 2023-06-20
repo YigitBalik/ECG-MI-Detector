@@ -1,2 +1,2 @@
-# ECG-MI-Detector
-End-to-end interpretable deep learning system for MI detection from 12-lead ECG reports
+# Uploads Folder
+Temporary folder for uploaded ECG reports. All files will be deleted after the system provides results.
