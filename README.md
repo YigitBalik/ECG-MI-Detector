@@ -5,7 +5,7 @@ End-to-end interpretable deep learning system for MI detection from 12-lead ECG 
 
 ### *Dependency Installattion* (Linux-Based System, Prefably *Ubuntu*)
 ```sh
-$ conda activate your_venv
+$ source your_venv/activate
 $ pip install -r requirements.txt
 $ sudo apt-get update
 $ sudo apt-get upgrade
