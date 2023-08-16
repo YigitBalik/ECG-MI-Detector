@@ -10,5 +10,6 @@ $ pip install -r requirements.txt
 $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install inkscape
+$ export _INKSCAPE_GC="disable"
 $ sudo apt install poppler-utils
 ```
