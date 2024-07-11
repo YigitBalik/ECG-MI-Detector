@@ -7,6 +7,8 @@ import cmath
 import scipy as sp
 import pandas as pd
 import re
+from scipy.interpolate import interp1d
+
 
 class SignalExtractor(object):
 
@@ -101,161 +103,84 @@ class SignalExtractor(object):
         return x_list, y_list
     
     def fix_data(self, x_list, y_list):
-        bl1 = y_list[0][-1]
-        bl2 = y_list[1][-1]
-        bl3 = y_list[2][-1]
-        bl4 = y_list[3][-1]
-        bl5 = y_list[4][-1]
-        bl6 = y_list[5][-1]
-        
+        # Check and print the length of y_list to debug
+        print(f"Length of y_list: {len(y_list)}")
+        for i in range(len(y_list)):
+            print(f"Length of y_list[{i}]: {len(y_list[i]) if y_list[i] else 'Empty'}")
 
-        dis_fn6 = bl1 - y_list[6][0]
+        # Initialize baseline levels (assuming at least 6 y-lists are available)
+        bl = [y_list[i][-1] if len(y_list) > i and y_list[i] else None for i in range(6)]
 
-        if dis_fn6 > 0:
-            y_list[6] = list(map(lambda y:y + dis_fn6, y_list[6]))
-            x_list[6], y_list[6] = self.inter2(x_list[6],y_list[6])
-            y_list[6] = list(map(lambda y: y - y_list[6][0], y_list[6]))
-        else:
-            y_list[6] = list(map(lambda y: y - dis_fn6, y_list[6]))
-            x_list[6], y_list[6] = self.inter2(x_list[6],y_list[6])
-            y_list[6] = list(map(lambda y: y - y_list[6][0], y_list[6]))
-
-        dis_fn7 = bl2 - y_list[7][0]
-        if dis_fn7 > 0:
-            y_list[7] = list(map(lambda y: y + dis_fn7, y_list[7]))
-            x_list[7], y_list[7] = self.inter2(x_list[7],y_list[7])
-            y_list[7] = list(map(lambda y: y - y_list[7][0], y_list[7]))
-        else:
-            y_list[7] = list(map(lambda y: y - dis_fn7, y_list[7]))
-            x_list[7], y_list[7] = self.inter2(x_list[7],y_list[7])
-            y_list[7] = list(map(lambda y: y - y_list[7][0], y_list[7]))
-
-        dis_fn8 = bl3 - y_list[8][0]
-        if dis_fn8 > 0:
-            y_list[8] = list(map(lambda y: y + dis_fn8, y_list[8]))
-            x_list[8], y_list[8] = self.inter2(x_list[8],y_list[8])
-            y_list[8] = list(map(lambda y: y - y_list[8][0], y_list[8]))
-        else:
-            y_list[8] = list(map(lambda y: y - dis_fn8, y_list[8]))
-            x_list[8], y_list[8] = self.inter2(x_list[8],y_list[8])
-            y_list[8] = list(map(lambda y: y - y_list[8][0], y_list[8]))
-
-        dis_fn9 = bl4 - y_list[9][0]
-        if dis_fn9 > 0:
-            y_list[9] = list(map(lambda y: y + dis_fn9, y_list[9]))
-            x_list[9], y_list[9] = self.inter2(x_list[9],y_list[9])
-            y_list[9] = list(map(lambda y: y - y_list[9][0], y_list[9]))
-        else:
-            y_list[9] = list(map(lambda y: y - dis_fn9, y_list[9]))
-            x_list[9], y_list[9] = self.inter2(x_list[9],y_list[9])
-            y_list[9] = list(map(lambda y: y - y_list[9][0], y_list[9]))
-
-        dis_fn10 = bl5 - y_list[10][0]
-        if dis_fn10 > 0:
-            y_list[10] = list(map(lambda y: y + dis_fn10, y_list[10]))
-            x_list[10], y_list[10] = self.inter2(x_list[10],y_list[10])
-            y_list[10] = list(map(lambda y: y - y_list[10][0], y_list[10]))
-        else:
-            y_list[10] = list(map(lambda y: y - dis_fn10, y_list[10]))
-            x_list[10], y_list[10] = self.inter2(x_list[10],y_list[10])
-            y_list[10] = list(map(lambda y: y - y_list[10][0], y_list[10]))
-
-        dis_fn11 = bl6 - y_list[11][0]
-        if dis_fn11 > 0:
-            y_list[11] = list(map(lambda y: y + dis_fn11, y_list[11]))
-            x_list[11], y_list[11] = self.inter2(x_list[11],y_list[11])
-            y_list[11] = list(map(lambda y: y - y_list[11][0], y_list[11]))
-        else:
-            y_list[11] = list(map(lambda y: y - dis_fn11, y_list[11]))
-            x_list[11], y_list[11] = self.inter2(x_list[11],y_list[11])
-            y_list[11] = list(map(lambda y: y - y_list[11][0], y_list[11]))
+        # Process each subsequent y-list if it exists and is not empty
+        for i in range(6, 12):
+            if len(y_list) > i and y_list[i] and bl[i-6] is not None:
+                dis_fn = bl[i-6] - y_list[i][0]
+                adjustment = dis_fn if dis_fn > 0 else -dis_fn
+                y_list[i] = [y + adjustment for y in y_list[i]]
+                x_list[i], y_list[i] = self.inter2(x_list[i], y_list[i])
+                y_list[i] = [y - y_list[i][0] for y in y_list[i]]
 
         return x_list, y_list
+
     
-    def adj(self, x_list,y_list):
-        candid_1 = y_list[0]
-        max_value_1 = max(candid_1)
-        min_value_1 = min(candid_1)
-        base_1 = abs(max_value_1 - min_value_1)
-        y_list[6] = [x/base_1 for x in y_list[6]]
-        
-        candid_2 = y_list[1]
-        max_value_2 = max(candid_2)
-        min_value_2 = min(candid_2)
-        base_2 = abs(max_value_2 - min_value_2)
-        y_list[7] = [x/base_2 for x in y_list[7]]
-        
-        candid_3 = y_list[2]
-        max_value_3 = max(candid_3)
-        min_value_3 = min(candid_3)
-        base_3 = abs(max_value_3 - min_value_3)
-        y_list[8] = [x/base_3 for x in y_list[8]]
-
-        candid_4 = y_list[3]
-        max_value_4 = max(candid_4)
-        min_value_4 = min(candid_4)
-        base_4 = abs(max_value_4 - min_value_4)
-        y_list[9] = [x/base_4 for x in y_list[9]]
-
-        candid_5 = y_list[4]
-        max_value_5 = max(candid_5)
-        min_value_5 = min(candid_5)
-        base_5 = abs(max_value_5 - min_value_5)
-        y_list[10] = [x/base_5 for x in y_list[10]]
-
-        candid_6 = y_list[5]
-        max_value_6 = max(candid_6)
-        min_value_6 = min(candid_6)
-        base_6 = abs(max_value_6 - min_value_6)
-        y_list[11] = [x/base_6 for x in y_list[11]]
-        
+    def adj(self, x_list, y_list):
+        num_of_signals = len(y_list)
+        for i in range(num_of_signals):  # Adjust loop to iterate over actual signal counts
+            if i < 6:  # Check only the first six signals for scaling
+                candid = y_list[i]
+                max_value = max(candid)
+                min_value = min(candid)
+                base = abs(max_value - min_value)
+                if base == 0:
+                    continue  # Avoid division by zero
+                if i + 6 < num_of_signals:  # Check if the adjusted signal index exists
+                    y_list[i + 6] = [x / base for x in y_list[i + 6]]
         return x_list, y_list
+
+
+
     
     def mk_pECG(self, x_list, y_list):
-        p_df_6 = pd.DataFrame(y_list[6])
-        p_df_7 = pd.DataFrame(y_list[7])
-        p_df_8 = pd.DataFrame(y_list[8])
-        p_df_9 = pd.DataFrame(y_list[9])
-        p_df_10 = pd.DataFrame(y_list[10])
-        p_df_11 = pd.DataFrame(y_list[11])
+        data_frames = []
+        # Creating a list of data frames from y_list elements
+        for index in range(len(y_list)):
+            df = pd.DataFrame(y_list[index])
+            data_frames.append(df)
+        # Ensure you have enough data frames or handle the missing ones appropriately
+        while len(data_frames) < 12:
+            # Append an empty DataFrame or handle it in a way that fits your use case
+            data_frames.append(pd.DataFrame())
+        return data_frames  # Now data_frames contains exactly 12 elements, some might be empty
 
-        return p_df_6, p_df_7, p_df_8, p_df_9, p_df_10, p_df_11
     
     def execute(self, file, file_name):
         pth_tmp = self.pars_info(file)
         lst_tmp = self.chang_corrd(pth_tmp)
         x_list, y_list = self.corrd2data(lst_tmp)
-        # print(len(x_list[6]), len(y_list[6]))
         x_list, y_list = self.fix_data(x_list, y_list)
-        # print(len(x_list[6]), len(y_list[6]))
         x_list, y_list = self.adj(x_list, y_list)
-        # print(len(x_list[6]), len(y_list[6]))
 
-        
-        p_df_6,p_df_7,p_df_8,p_df_9, p_df_10,p_df_11 = self.mk_pECG(x_list,y_list)
+        data_frames = self.mk_pECG(x_list, y_list)
+        p_df_6, p_df_7, p_df_8, p_df_9, p_df_10, p_df_11 = data_frames[5:11]  # Accessing the specific DataFrames
 
-        signals_half = np.zeros((5000,6))
-        signals_half[:, 0] = p_df_6.values.reshape(-1)
-        signals_half[:, 1] = p_df_7.values.reshape(-1)
-        signals_half[:, 2] = p_df_8.values.reshape(-1)
-        signals_half[:, 3] = p_df_9.values.reshape(-1)
-        signals_half[:, 4] = p_df_10.values.reshape(-1)
-        signals_half[:, 5] = p_df_11.values.reshape(-1)
+        signals_half = np.zeros((5000, 6))
+
+        # Interpolate each signal to the required length of 5000
+        def interpolate_signal(signal, target_length=5000):
+            x_old = np.linspace(0, 1, len(signal))
+            x_new = np.linspace(0, 1, target_length)
+            interpolator = interp1d(x_old, signal, kind='linear', fill_value="extrapolate")
+            return interpolator(x_new)
+
+        signals_half[:, 0] = interpolate_signal(p_df_6.values.flatten())
+        signals_half[:, 1] = interpolate_signal(p_df_7.values.flatten())
+        signals_half[:, 2] = interpolate_signal(p_df_8.values.flatten())
+        signals_half[:, 3] = interpolate_signal(p_df_9.values.flatten())
+        signals_half[:, 4] = interpolate_signal(p_df_10.values.flatten())
+        signals_half[:, 5] = interpolate_signal(p_df_11.values.flatten())
+
         return signals_half
-        # if '3' in file:
-        #     p_df_6.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGI"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_7.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGII"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_8.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGIII"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_9.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGaVR"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_10.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGaVL"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_11.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGaVF"+".gz"),index=False,header=False,compression='gzip')
-        # elif '4' in file:
-        #     p_df_6.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV1"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_7.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV2"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_8.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV3"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_9.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV4"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_10.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV5"+".gz"),index=False,header=False,compression='gzip')
-        #     p_df_11.to_csv(os.path.join(dir, file_name[:-4]+ "_" +"ECGV6"+".gz"),index=False,header=False,compression='gzip')
+        
 
 class InfoExtractor(object):
     def __init__(self, out_dir):
@@ -302,17 +227,27 @@ class DataExtractor(object):
 
     def pdf2svg(self, file_name, temp_dir):
         """
-        Converts the pages 3 and 4 to svg format in order to extract signals
+        Converts pages 3 and 4 of a PDF to SVG format to extract signals.
         """
+        # Generate paths for the PDF pages to be converted.
         page3_path = os.path.join(temp_dir, file_name[:-4] + "_" + str(3) + ".pdf")
         page4_path = os.path.join(temp_dir, file_name[:-4] + "_" + str(4) + ".pdf")
 
-        command3 = "inkscape -z -f "+ page3_path +" -l " + page3_path[:-3] +"svg"
-        command4 = "inkscape -z -f "+ page4_path +" -l " + page4_path[:-3] +"svg"
-        
+        # Define output paths for the SVG files.
+        svg3_path = os.path.join(temp_dir, file_name[:-4] + "_" + str(3) + ".svg")
+        svg4_path = os.path.join(temp_dir, file_name[:-4] + "_" + str(4) + ".svg")
+
+        # Construct Inkscape commands using the new command style.
+        command3 = f"inkscape {page3_path} --export-filename={svg3_path}"
+        command4 = f"inkscape {page4_path} --export-filename={svg4_path}"
+
+        # Execute the commands to convert PDFs to SVG format.
         os.system(command3)
         os.system(command4)
-        return page3_path[:-3] +"svg", page4_path[:-3] +"svg"
+
+        # Return paths of the generated SVG files.
+        return svg3_path, svg4_path
+
 
     def pdf2txt(self, file_name, temp_dir):
         """
@@ -356,8 +291,6 @@ class DataExtractor(object):
 
             np.save(os.path.join(dir, "signals"),signals)
             np.save(os.path.join(dir, "info"),info)
-
-
 
 
 if __name__ == "__main__":
